@@ -25,7 +25,7 @@ NEXTCLOUDDNS="group.stickynotes.work"
 DATABASE="m"
 NCDBUSER="ncdbuser"
 CURRENTTIMEZONE='Europe/Berlin'
-PHONEREGION='DE'
+PHONEREGION='US'
 NEXTCLOUDOFFICE="n"
 ONLYOFFICE="n"
 UPLOADSIZE='10G'
@@ -149,7 +149,7 @@ done
 rm -Rf $NEXTCLOUDDATAPATH
 mv /etc/hosts.bak /etc/hosts
 apt remove --purge --allow-change-held-packages -y nginx* php* mariadb-* mysql-common libdbd-mariadb-perl galera-* postgresql-* redis* fail2ban ufw
-rm -Rf /etc/ufw /etc/fail2ban /var/www /etc/mysql /etc/postgresql /etc/postgresql-common /var/lib/mysql /var/lib/postgresql /etc/letsencrypt /var/log/nextcloud /home/$USERNAME/Nextcloud-Installationsskript/install.log /home/$USERNAME/Nextcloud-Installationsskript/update.sh
+rm -Rf /etc/ufw /etc/fail2ban /var/www /etc/mysql /etc/postgresql /etc/postgresql-common /var/lib/mysql /var/lib/postgresql /etc/letsencrypt /var/log/nextcloud /home/$USERNAME/nextcloudinstall/install.log /home/$USERNAME/nextcloudinstall/update.sh
 rm -Rf /etc/nginx /usr/share/keyrings/nginx-archive-keyring.gpg /usr/share/keyrings/postgresql-archive-keyring.gpg
 add-apt-repository ppa:ondrej/php -ry
 rm -f /etc/ssl/certs/dhparam.pem /etc/apt/sources.list.d/* /etc/motd /root/.bash_aliases
@@ -187,15 +187,15 @@ else
   echo "*************************************************"
   echo ""
 fi
-# Verify homedirectory    #
+# Check if the home directory for the user does not exist
 if [ ! -d "/home/$USERNAME/" ]; then
   echo "* Creating:  Home Directory ..........:::::: OK *"
-  mkdir -p /home/"$USERNAME"/
+  mkdir -p /home/"$USERNAME"/  # Create the home directory for the user
   echo ""
-  else
+else
   echo "* Test: Home directory ..........::::::::::: OK *"
   echo ""
-  fi
+fi
 if [ ! -d "/home/$USERNAME/Nextcloud_Install_Script/" ]; then
   echo "* Creating: Install directory .......::::::: OK *"
   mkdir /home/"$USERNAME"/Nextcloud_Install_Script/
@@ -257,7 +257,7 @@ ${cat} <<EOF >> /etc/motd
 
 EOF
 # Logfile
-exec > >(tee -i "/home/$USERNAME/Nextcloud-Installationsskript/install.log")
+exec > >(tee -i "/home/$USERNAME/nextcloudinstall/install.log")
 exec 2>&1
 # Update-function
 function update_and_clean() {
@@ -736,7 +736,7 @@ server {
   ssl_session_timeout 1d;
   ssl_session_cache shared:SSL:50m;
   ssl_session_tickets off;
-  ssl_protocols TLSv1.3 TLSv1.2;
+  ssl_protocols TLSv1.3;
   ssl_ciphers 'TLS-CHACHA20-POLY1305-SHA256:TLS-AES-256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384';
   ssl_ecdh_curve X448:secp521r1:secp384r1;
   ssl_prefer_server_ciphers on;
@@ -834,8 +834,8 @@ ${echo} ""
 ${echo} ""
 sleep 3
 # Hostname
-${sed} -i "s/server_name cloud.server.io;/server_name $(hostname) $NEXTCLOUDDNS;/" /etc/nginx/conf.d/http.conf
-${sed} -i "s/server_name cloud.server.io;/server_name $(hostname) $NEXTCLOUDDNS;/" /etc/nginx/conf.d/nextcloud.conf
+${sed} -i "s/server_name $(hostname);/server_name $(hostname) $NEXTCLOUDDNS;/" /etc/nginx/conf.d/http.conf
+${sed} -i "s/server_name $(hostname);/server_name $(hostname) $NEXTCLOUDDNS;/" /etc/nginx/conf.d/nextcloud.conf
 # Nextcloud-CRON
 (/usr/bin/crontab -u www-data -l ; echo "*/5 * * * * /usr/bin/php -f /var/www/nextcloud/cron.php > /dev/null 2>&1") | /usr/bin/crontab -u www-data -
 # Restart NGINX
